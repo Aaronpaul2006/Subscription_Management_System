@@ -1,0 +1,42 @@
+[project]
+name = "subscription-management-system"
+version = "1.0.0"
+description = "Brightloop subscription, recurring billing and revenue platform"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.0,<6.2",
+    "djangorestframework>=3.16",
+    "django-filter>=25.1",
+    "drf-spectacular>=0.28",
+    "dj-database-url>=3.0",
+    "whitenoise>=6.9",
+    "reportlab>=4.4",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.2"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "pytest-django>=4.11",
+    "ruff>=0.13",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+ignore = ["DJ001"]
