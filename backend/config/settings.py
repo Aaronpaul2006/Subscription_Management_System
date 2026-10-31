@@ -112,7 +112,8 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [FRONTEND_DIST / "assets"] if (FRONTEND_DIST / "assets").exists() else []
+# The built web app's files (index.html, /assets/*, favicon) are served from
+# the site root by WhiteNoise; see config/urls.py for the client-side routes.
 WHITENOISE_ROOT = FRONTEND_DIST if FRONTEND_DIST.exists() else None
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

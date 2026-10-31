@@ -87,7 +87,7 @@ export function BillingPage() {
                         <td className="td"><Link to={`/subscriptions/${r.subscription_id}`} className="font-medium text-brand-600 hover:underline">{r.subscription}</Link><div className="text-xs text-slate-500">{r.plan}</div></td>
                         <td className="td max-w-48 truncate">{r.customer}</td>
                         <td className="td text-xs">{formatDate(r.period_start, false)} – {formatDate(r.period_end)}{r.prorated && <Badge status="PAUSED" className="ml-1">prorated</Badge>}</td>
-                        <td className="td text-xs text-emerald-600">{r.discounts.join(", ") || <span className="text-slate-400">—</span>}</td>
+                        <td className="td text-xs whitespace-normal text-emerald-600">{r.discounts.join(", ") || <span className="text-slate-400">—</span>}</td>
                         <td className="td text-right font-medium"><Money value={r.total} /></td>
                       </tr>
                     ))}

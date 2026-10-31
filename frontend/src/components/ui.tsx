@@ -174,7 +174,11 @@ export function Stat({ label, value, hint, icon, tone = "default", to }: { label
 }
 
 export function Money({ value, className, compact }: { value: string | null | undefined; className?: string; compact?: boolean }) {
-  return <span className={clsx("tabular", className)}>{formatMoney(value, { compact })}</span>;
+  return (
+    <span className={clsx("tabular", className)} title={compact ? formatMoney(value) : undefined}>
+      {formatMoney(value, { compact })}
+    </span>
+  );
 }
 
 const statusTones: Record<string, string> = {

@@ -380,7 +380,7 @@ export function InvoiceDetail({ portal = false }: { portal?: boolean }) {
         <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">Paying invoice <strong>{inv.display_number}</strong> in full.</p>
         <div className="grid grid-cols-3 gap-2">
           {[["CARD", "Card"], ["UPI", "UPI"], ["BANK_TRANSFER", "Net banking"]].map(([value, text]) => (
-            <button key={value} onClick={() => setCheckoutMethod(value)} className={`rounded-lg border px-3 py-3 text-sm font-medium ${checkoutMethod === value ? "border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/30" : "border-slate-200 dark:border-slate-700"}`}>
+            <button key={value} onClick={() => setCheckoutMethod(value)} className={`rounded-lg border px-3 py-3 text-sm font-medium ${checkoutMethod === value ? "border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-200" : "border-slate-200 dark:border-slate-700"}`}>
               {text}
             </button>
           ))}

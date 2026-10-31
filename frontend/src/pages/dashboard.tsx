@@ -136,10 +136,10 @@ function DashboardBody({ data }: { data: DashboardData }) {
             </span>
           }
         />
-        <Stat label="Monthly recurring revenue" value={<Money value={s("mrr")} />} icon={<TrendingUp className="size-5" />} hint={<>ARR <Money value={s("arr")} compact /> · ARPA <Money value={s("arpa")} compact /></>} />
+        <Stat label="Monthly recurring revenue" value={<Money value={s("mrr")} compact />} icon={<TrendingUp className="size-5" />} hint={<>ARR <Money value={s("arr")} compact /> · ARPA <Money value={s("arpa")} compact /></>} />
         <Stat
           label="Collected"
-          value={<Money value={s("collected")} />}
+          value={<Money value={s("collected")} compact />}
           icon={<Banknote className="size-5" />}
           tone="good"
           to="/payments"
@@ -147,7 +147,7 @@ function DashboardBody({ data }: { data: DashboardData }) {
         />
         <Stat
           label="Overdue"
-          value={<Money value={s("overdue")} />}
+          value={<Money value={s("overdue")} compact />}
           icon={<AlertTriangle className="size-5" />}
           tone={isZero(s("overdue")) ? "good" : "bad"}
           to="/invoices?tab=OVERDUE"

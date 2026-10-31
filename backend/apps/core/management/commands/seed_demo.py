@@ -302,7 +302,7 @@ class Command(BaseCommand):
             T.SERVICE,
             "15000",
             "6000",
-            "One-time setup billed with the first period.",
+            "Remote setup and training, billed per workshop.",
         )
         self.p_legacy = product("Legacy POS licence", T.SOFTWARE, "800", "100", "Retired.")
         self.p_legacy.is_active = False
@@ -382,7 +382,11 @@ class Command(BaseCommand):
             notes="Includes onboarding and priority support. Prices exclude GST.",
         )
         for i, (prod, qty) in enumerate(
-            [(self.p_crm, 25), (self.p_books, 1), (self.p_support, 1), (self.p_onboard, 1)]
+            [
+                (self.p_crm, 25),
+                (self.p_books, 1),
+                (self.p_support, 1),
+            ]
         ):
             QuotationTemplateLine.objects.create(
                 template=t1, product=prod, quantity=qty, sequence=i
@@ -574,7 +578,8 @@ class Command(BaseCommand):
                 created_by=self.staff,
                 created_at=timezone.make_aware(
                     timezone.datetime.combine(
-                        start - timedelta(days=rng.randint(3, 25)), timezone.datetime.min.time()
+                        min(start - timedelta(days=rng.randint(3, 25)), today),
+                        timezone.datetime.min.time(),
                     )
                 ),
             )
@@ -588,7 +593,9 @@ class Command(BaseCommand):
                     timezone.datetime.combine(start, timezone.datetime.min.time())
                 )
             # Lines: plan fee (seats) plus 0-3 add-ons.
-            seats = Decimal(max(int(plan.min_quantity), rng.choice([1, 2, 3, 5, 8, 12, 25, 40])))
+            short = plan.billing_period in ("DAILY", "WEEKLY")
+            seat_choices = [1, 2, 3] if short else [1, 2, 3, 5, 8, 12, 25, 40]
+            seats = Decimal(max(int(plan.min_quantity), rng.choice(seat_choices)))
             spec = [
                 (
                     None,
@@ -599,7 +606,11 @@ class Command(BaseCommand):
                     plan_tax,
                 )
             ]
-            for prod in rng.sample(line_choices, rng.randint(0, 3)):
+            if short:
+                addons = [self.p_sms] if rng.random() < 0.3 else []
+            else:
+                addons = rng.sample(line_choices, rng.randint(0, 3))
+            for prod in addons:
                 var = rng.choice(variants[prod.id]) if variants[prod.id] else None
                 qty = seats if prod is self.p_crm else Decimal(rng.choice([1, 1, 2, 5]))
                 price = prod.sales_price + (var.extra_price if var else ZERO)
@@ -775,7 +786,7 @@ class Command(BaseCommand):
             overdue_by = (today - inv.due_date).days
             roll = rng.random()
             if overdue_by > 0:
-                full, partial = (0.9, 0.04) if overdue_by > 45 else (0.72, 0.08)
+                full, partial = (0.96, 0.02) if overdue_by > 45 else (0.8, 0.08)
             else:
                 full, partial = 0.35, 0.05
             if roll < full:

@@ -241,7 +241,7 @@ def bill_next_period(
     """
     with transaction.atomic():
         sub = (
-            Subscription.objects.select_for_update()
+            Subscription.objects.select_for_update(of=("self",))
             .select_related("plan", "customer", "payment_term")
             .get(pk=sub.pk)
         )
@@ -540,7 +540,7 @@ def rebill_period(invoice: Invoice, actor=None) -> Invoice:
     if invoice.status != I.CANCELLED or invoice.subscription_id is None:
         raise Invalid("Only a cancelled subscription invoice can be re-billed.")
     sub = (
-        Subscription.objects.select_for_update()
+        Subscription.objects.select_for_update(of=("self",))
         .prefetch_related("lines__taxes")
         .select_related("plan", "customer", "payment_term")
         .get(pk=invoice.subscription_id)

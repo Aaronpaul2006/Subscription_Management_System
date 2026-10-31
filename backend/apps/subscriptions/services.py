@@ -31,7 +31,9 @@ def tax_rules(taxes) -> list[TaxRule]:
 
 def _lock(sub: Subscription) -> Subscription:
     return (
-        Subscription.objects.select_for_update().select_related("plan", "customer").get(pk=sub.pk)
+        Subscription.objects.select_for_update(of=("self",))
+        .select_related("plan", "customer")
+        .get(pk=sub.pk)
     )
 
 
