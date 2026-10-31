@@ -146,19 +146,25 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-# Every outgoing email is stored in the Outbox (visible to admins) and then
-# handed to the delivery backend: SMTP when EMAIL_HOST is set, else the console.
-EMAIL_BACKEND = "apps.core.mail.OutboxEmailBackend"
-OUTBOX_DELIVERY_BACKEND = (
-    "django.core.mail.backends.smtp.EmailBackend"
+# Every outgoing email is stored in the Outbox (visible to admins), then handed
+# to the "delivery" mailer: SMTP when EMAIL_HOST is set. Without SMTP the Outbox
+# is the mailbox, which is handy for demos.
+_SMTP = {
+    "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+    "OPTIONS": {
+        "host": os.environ.get("EMAIL_HOST", ""),
+        "port": int(os.environ.get("EMAIL_PORT", "587")),
+        "username": os.environ.get("EMAIL_HOST_USER", ""),
+        "password": os.environ.get("EMAIL_HOST_PASSWORD", ""),
+        "use_tls": env_bool("EMAIL_USE_TLS", True),
+    },
+}
+MAILERS = {
+    "default": {"BACKEND": "apps.core.mail.OutboxEmailBackend"},
+    "delivery": _SMTP
     if os.environ.get("EMAIL_HOST")
-    else "django.core.mail.backends.console.EmailBackend"
-)
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+    else {"BACKEND": "django.core.mail.backends.dummy.EmailBackend"},
+}
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL", "Brightloop Billing <billing@brightloop.test>"
 )

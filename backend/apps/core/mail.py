@@ -1,7 +1,7 @@
 """Email delivery through the Outbox.
 
 Every message is written to ``OutboundEmail`` first, then handed to the real
-delivery backend (SMTP in production, console in development). A failed SMTP
+"delivery" mailer (SMTP in production, nothing in development). A failed SMTP
 delivery is recorded on the Outbox row instead of breaking the business action
 that sent it (e.g. confirming an invoice).
 """
@@ -9,7 +9,7 @@ that sent it (e.g. confirming an invoice).
 import logging
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, get_connection
+from django.core.mail import EmailMultiAlternatives, mailers
 from django.core.mail.backends.base import BaseEmailBackend
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,8 @@ class OutboxEmailBackend(BaseEmailBackend):
         from .models import OutboundEmail
 
         sent = 0
-        delivery = get_connection(settings.OUTBOX_DELIVERY_BACKEND, fail_silently=False)
+        delivery = mailers["delivery"]
+        stored_only = settings.MAILERS["delivery"]["BACKEND"].endswith("dummy.EmailBackend")
         for message in email_messages:
             html = ""
             for content, mimetype in getattr(message, "alternatives", []) or []:
@@ -36,6 +37,11 @@ class OutboxEmailBackend(BaseEmailBackend):
                 ],
                 category=message.extra_headers.get("X-Category", ""),
             )
+            if stored_only:
+                row.status = "stored"
+                row.save(update_fields=["status"])
+                sent += 1
+                continue
             try:
                 delivery.send_messages([message])
             except Exception as exc:  # delivery problems must not undo business actions

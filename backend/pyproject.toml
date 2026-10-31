@@ -31,6 +31,8 @@ DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
 addopts = "-q"
+filterwarnings = ["ignore:No directory at:UserWarning"]
+markers = ["slow: loads thousands of subscriptions (deselect with -m 'not slow')"]
 
 [tool.ruff]
 line-length = 100

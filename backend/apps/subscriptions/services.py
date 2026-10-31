@@ -326,10 +326,16 @@ def activate(sub: Subscription, actor=None) -> Subscription:
 
 @transaction.atomic
 def pause(sub: Subscription, actor=None) -> Subscription:
+    from apps.invoicing.services import bill_owed_periods
+
     sub = _lock(sub)
     _require(sub, S.ACTIVE, action="pause")
     if not sub.plan.pausable:
         raise Forbidden(f"The {sub.plan.name} plan cannot be paused.", code="plan_not_pausable")
+    # Periods that started before the pause are owed: bill them now, so that a
+    # resume only skips time actually spent paused.
+    bill_owed_periods(sub, timezone.localdate(), actor)
+    sub = _lock(sub)
     sub.status = S.PAUSED
     sub.paused_at = timezone.localdate()
     sub.save()

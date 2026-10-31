@@ -536,6 +536,7 @@ def cancel_invoice(invoice: Invoice, actor=None, reason: str = "") -> Invoice:
 def rebill_period(invoice: Invoice, actor=None) -> Invoice:
     """Re-issue a cancelled subscription invoice for the same period, with the
     subscription's current lines (e.g. after correcting a quantity)."""
+    invoice = Invoice.objects.get(pk=invoice.pk)
     if invoice.status != I.CANCELLED or invoice.subscription_id is None:
         raise Invalid("Only a cancelled subscription invoice can be re-billed.")
     sub = (
@@ -733,6 +734,20 @@ def send_overdue_reminders(as_of: date | None = None) -> int:
         )
         sent += 1
     return sent
+
+
+def bill_owed_periods(sub: Subscription, as_of: date, actor=None) -> list[Invoice]:
+    """Draft an invoice for every period of ``sub`` that has started by ``as_of``."""
+    created = []
+    while True:
+        current = Subscription.objects.only("id", "status", "next_invoice_date", "expiry_date").get(
+            pk=sub.pk
+        )
+        if current.status != Subscription.Status.ACTIVE or not (
+            is_billable(current, current.next_invoice_date) and current.next_invoice_date <= as_of
+        ):
+            return created
+        created.append(bill_next_period(sub, actor=actor))
 
 
 def run_daily_jobs(as_of: date | None = None, actor=None) -> dict:
