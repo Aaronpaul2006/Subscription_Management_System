@@ -23,6 +23,7 @@ interface Gaps {
 }
 
 const today = () => new Date().toISOString().slice(0, 10);
+const plural = (n: number | undefined, word: string) => `${n ?? 0} ${word}${n === 1 ? "" : "s"}`;
 
 export function BillingPage() {
   const { isAdmin } = useRole();
@@ -37,7 +38,7 @@ export function BillingPage() {
   const invalidate = [["billing"], ["invoices"], ["dashboard"], ["subscriptions"]];
   const run = useAction(() => post<BillingRun>("billing/runs/run/", { as_of: asOf, auto_confirm: autoConfirm, auto_send: autoSend }), {
     invalidate,
-    success: (r) => `Billing run done: ${r.invoices_created} invoices in ${(r.duration_ms / 1000).toFixed(1)} s`,
+    success: (r) => `Billing run done: ${plural(r.invoices_created, "invoice")} in ${(r.duration_ms / 1000).toFixed(1)} s`,
     onSuccess: (r) => {
       setConfirmOpen(false);
       setLastRun(r);
@@ -109,7 +110,7 @@ export function BillingPage() {
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-900 dark:bg-emerald-950/30">
               <div className="flex items-center gap-2 font-medium text-emerald-800 dark:text-emerald-300"><CalendarCheck className="size-5" /> Run #{lastRun.id} complete</div>
               <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-                {lastRun.invoices_created} invoices for <Money value={lastRun.total_amount} /> across {lastRun.subscriptions_processed} subscriptions in {(lastRun.duration_ms / 1000).toFixed(1)} s.
+                {plural(lastRun.invoices_created, "invoice")} for <Money value={lastRun.total_amount} /> across {plural(lastRun.subscriptions_processed, "subscription")} in {(lastRun.duration_ms / 1000).toFixed(1)} s.
                 {lastRun.errors.length > 0 && ` ${lastRun.errors.length} subscriptions need attention.`}
               </p>
               <Link to={`/invoices?tab=${lastRun.auto_confirm ? "CONFIRMED" : "DRAFT"}`} className="mt-2 inline-block text-sm font-medium text-emerald-700 underline">View the new invoices</Link>
@@ -188,7 +189,7 @@ export function BillingPage() {
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         title="Run billing now?"
-        footer={<><Button variant="secondary" onClick={() => setConfirmOpen(false)}>Cancel</Button><Button loading={run.isPending} onClick={() => run.mutate(undefined)}>Create {p?.invoices} invoices</Button></>}
+        footer={<><Button variant="secondary" onClick={() => setConfirmOpen(false)}>Cancel</Button><Button loading={run.isPending} onClick={() => run.mutate(undefined)}>Create {plural(p?.invoices, "invoice")}</Button></>}
       >
         <ErrorBox error={run.error} />
         <Field label="">
