@@ -66,7 +66,9 @@ def reset_password(uid: str, token: str, password: str) -> User:
     try:
         user = User.objects.get(pk=force_str(urlsafe_base64_decode(uid)), is_active=True)
     except (User.DoesNotExist, ValueError, TypeError, OverflowError):
-        raise Invalid("This reset link is invalid or has expired.", code="reset_link_invalid")
+        raise Invalid(
+            "This reset link is invalid or has expired.", code="reset_link_invalid"
+        ) from None
     if not default_token_generator.check_token(user, token):
         raise Invalid("This reset link is invalid or has expired.", code="reset_link_invalid")
     password_validation.validate_password(password, user)

@@ -159,7 +159,9 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Brightloop Billing <billing@brightloop.test>")
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL", "Brightloop Billing <billing@brightloop.test>"
+)
 
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:5173")
 

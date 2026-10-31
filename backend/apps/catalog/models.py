@@ -104,15 +104,21 @@ class RecurringPlan(models.Model):
     name = models.CharField(max_length=120, unique=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(
-        **MONEY, default=0, validators=[MinValueValidator(0)],
+        **MONEY,
+        default=0,
+        validators=[MinValueValidator(0)],
         help_text="Base recurring fee per unit, per billing period.",
     )
     billing_period = models.CharField(max_length=8, choices=Period.choices, default=Period.MONTHLY)
     billing_interval = models.PositiveSmallIntegerField(
         default=1, validators=[MinValueValidator(1)], help_text="Bill every N periods."
     )
-    min_quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1,
-                                       validators=[MinValueValidator(0)])
+    min_quantity = models.DecimalField(
+        max_digits=10, decimal_places=2, default=1, validators=[MinValueValidator(0)]
+    )
+    taxes = models.ManyToManyField(
+        Tax, blank=True, related_name="plans", help_text="Taxes on the plan's base fee."
+    )
     start_date = models.DateField(help_text="First day the plan can be sold.")
     end_date = models.DateField(null=True, blank=True, help_text="Last day the plan can be sold.")
     # Lifecycle options, decided plan by plan.
@@ -143,6 +149,8 @@ class RecurringPlan(models.Model):
         unit = {"DAILY": "day", "WEEKLY": "week", "MONTHLY": "month", "YEARLY": "year"}[
             self.billing_period
         ]
-        return f"every {unit}" if self.billing_interval == 1 else (
-            f"every {self.billing_interval} {unit}s"
+        return (
+            f"every {unit}"
+            if self.billing_interval == 1
+            else (f"every {self.billing_interval} {unit}s")
         )

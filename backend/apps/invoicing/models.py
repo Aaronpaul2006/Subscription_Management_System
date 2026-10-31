@@ -18,7 +18,10 @@ class BillingRun(models.Model):
     as_of = models.DateField()
     trigger = models.CharField(max_length=10, choices=Trigger.choices, default=Trigger.MANUAL)
     triggered_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     auto_confirm = models.BooleanField(default=True)
@@ -78,7 +81,10 @@ class Invoice(models.Model):
     reminder_count = models.PositiveSmallIntegerField(default=0)
     last_reminder_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     created_at = models.DateTimeField(default=timezone.now)
@@ -153,7 +159,9 @@ class InvoiceDiscount(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["invoice", "discount"], name="discount_once_per_invoice")
+            models.UniqueConstraint(
+                fields=["invoice", "discount"], name="discount_once_per_invoice"
+            )
         ]
 
 
@@ -179,7 +187,10 @@ class Payment(models.Model):
     note = models.CharField(max_length=300, blank=True)
     source = models.CharField(max_length=8, choices=Source.choices, default=Source.MANUAL)
     recorded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     created_at = models.DateTimeField(default=timezone.now)

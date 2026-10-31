@@ -3,8 +3,8 @@ from decimal import Decimal
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.db.models import Count, DecimalField, OuterRef, Q, Subquery, Sum, Value
 from django.db.models.functions import Coalesce
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -140,8 +140,13 @@ class StaffViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = serializer.save()
-        log_activity("user", user.id, "created", f"Added {user.name} as {user.get_role_display()}",
-                     self.request.user)
+        log_activity(
+            "user",
+            user.id,
+            "created",
+            f"Added {user.name} as {user.get_role_display()}",
+            self.request.user,
+        )
 
     def perform_update(self, serializer):
         if serializer.instance == self.request.user and (
@@ -179,14 +184,16 @@ class CustomerViewSet(viewsets.ModelViewSet):
         money = DecimalField(max_digits=14, decimal_places=2)
         return Customer.objects.annotate(
             active_subscriptions=Coalesce(Subquery(active), Value(0)),
-            outstanding=Coalesce(Subquery(due, output_field=money), Value(Decimal("0")),
-                                 output_field=money),
+            outstanding=Coalesce(
+                Subquery(due, output_field=money), Value(Decimal("0")), output_field=money
+            ),
         )
 
     def perform_create(self, serializer):
         customer = serializer.save()
-        log_activity("customer", customer.id, "created", f"Customer {customer} created",
-                     self.request.user)
+        log_activity(
+            "customer", customer.id, "created", f"Customer {customer} created", self.request.user
+        )
 
 
 def customer_search_q(term: str) -> Q:

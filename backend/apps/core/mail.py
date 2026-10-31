@@ -31,7 +31,9 @@ class OutboxEmailBackend(BaseEmailBackend):
                 subject=message.subject,
                 body=message.body,
                 html=html,
-                attachments=[a[0] if isinstance(a, tuple) else a.filename for a in message.attachments],
+                attachments=[
+                    a[0] if isinstance(a, tuple) else a.filename for a in message.attachments
+                ],
                 category=message.extra_headers.get("X-Category", ""),
             )
             try:

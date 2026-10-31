@@ -22,9 +22,7 @@ class QuotationTemplate(models.Model):
     name = models.CharField(max_length=120, unique=True)
     validity_days = models.PositiveSmallIntegerField(default=30)
     plan = models.ForeignKey(RecurringPlan, on_delete=models.PROTECT, related_name="templates")
-    payment_term = models.ForeignKey(
-        PaymentTerm, null=True, blank=True, on_delete=models.SET_NULL
-    )
+    payment_term = models.ForeignKey(PaymentTerm, null=True, blank=True, on_delete=models.SET_NULL)
     duration_months = models.PositiveSmallIntegerField(
         null=True, blank=True, help_text="Default contract length; empty = open-ended."
     )
@@ -73,7 +71,10 @@ class Subscription(models.Model):
     quotation_valid_until = models.DateField(null=True, blank=True)
     next_invoice_date = models.DateField(null=True, blank=True)
     salesperson = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     notes = models.TextField(blank=True, help_text="Internal notes.")
@@ -98,7 +99,10 @@ class Subscription(models.Model):
     mrr = models.DecimalField(**MONEY, default=0)
 
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     created_at = models.DateTimeField(default=timezone.now)
@@ -136,8 +140,13 @@ class Subscription(models.Model):
 
 class SubscriptionLine(models.Model):
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, related_name="lines")
-    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.PROTECT,
-                                help_text="Empty for the plan's base fee line.")
+    product = models.ForeignKey(
+        Product,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        help_text="Empty for the plan's base fee line.",
+    )
     variant = models.ForeignKey(ProductVariant, null=True, blank=True, on_delete=models.PROTECT)
     description = models.CharField(max_length=300)
     quantity = models.DecimalField(**QTY, validators=[MinValueValidator(0)])
@@ -173,7 +182,9 @@ class Discount(models.Model):
     scope = models.CharField(max_length=12, choices=Scope.choices, default=Scope.SUBSCRIPTION)
     products = models.ManyToManyField(Product, blank=True, related_name="discounts")
     subscriptions = models.ManyToManyField(
-        Subscription, blank=True, related_name="discounts",
+        Subscription,
+        blank=True,
+        related_name="discounts",
         help_text="Limit to these subscriptions. Empty = every subscription.",
     )
     min_purchase = models.DecimalField(**MONEY, null=True, blank=True)
@@ -185,7 +196,10 @@ class Discount(models.Model):
     )
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
         related_name="+",
     )
     created_at = models.DateTimeField(auto_now_add=True)
